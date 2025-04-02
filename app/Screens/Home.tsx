@@ -12,7 +12,7 @@ export default function Home({navigation}) {
       <View style={{ flex: 1, padding: 10, backgroundColor: "white" }}>
         <View>
           <View style={{alignItems:'center', marginBottom:20}}>
-          <Text style={{ fontSize: 20, fontWeight: "600", color: "blue" }}>
+          <Text style={{ fontSize: 20, fontWeight: "600", color: "#6F5AAA" }}>
             Welcome!
           </Text>
           </View>
@@ -20,17 +20,17 @@ export default function Home({navigation}) {
 
           <TouchableOpacity
           onPress={Calculatorhandler}
-            style={{ height: 100, borderRadius: 16, padding:10 ,alignItems:'center', justifyContent:'center',borderWidth:2, borderColor:'blue', marginBottom:20}}
+            style={{ height: 100, borderRadius: 16, padding:10 ,alignItems:'center', justifyContent:'center',borderWidth:2, borderColor:'#6F5AAA', marginBottom:20}}
           >
-            <Text style={{ fontSize: 14, fontWeight: "500" }}>
+            <Text style={{ fontSize: 18, fontWeight: "500" }}>
               Calculator and Bill generator
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={{ height: 100, borderRadius: 16, padding:10 ,alignItems:'center', justifyContent:'center',borderWidth:2, borderColor:'blue', }}
+            style={{ height: 100, borderRadius: 16, padding:10 ,alignItems:'center', justifyContent:'center',borderWidth:2, borderColor:'#6F5AAA', }}
           >
-            <Text style={{ fontSize: 14, fontWeight: "500" }}>
+            <Text style={{ fontSize: 18, fontWeight: "500" }}>
               Live Gold Rate 
             </Text>
           </TouchableOpacity>
