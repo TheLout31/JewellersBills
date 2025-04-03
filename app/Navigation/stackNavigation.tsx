@@ -16,7 +16,7 @@ const StackNavigator = () => {
         options={{
           title: "Home", // Optional: Set the header title
           headerStyle: {
-            backgroundColor: "#6F5AAA", // Set the header background color
+            backgroundColor: "#8a2be2", // Set the header background color
           },
           headerTintColor: "#fff", // Optional: Set the color of the title and back button
           headerTitleStyle: {
@@ -28,7 +28,7 @@ const StackNavigator = () => {
       options={{
         title: "Calculator", // Optional: Set the header title
         headerStyle: {
-          backgroundColor: "#6F5AAA", // Set the header background color
+          backgroundColor: "#8a2be2", // Set the header background color
         },
         headerTintColor: "#fff", // Optional: Set the color of the title and back button
         headerTitleStyle: {

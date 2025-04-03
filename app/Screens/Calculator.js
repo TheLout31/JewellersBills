@@ -9,9 +9,14 @@ import {
   ToastAndroid,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { Asset } from "expo-asset";
+import * as FileSystem from "expo-file-system";
 import { Button, IconButton, Checkbox } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import CustomButton from "@/components/CustomButton";
+import { printToFileAsync } from "expo-print";
+import * as Print from "expo-print";
+import { shareAsync } from "expo-sharing";
 
 export default function Calculator() {
   const navigation = useNavigation();
@@ -26,12 +31,32 @@ export default function Calculator() {
   const [includeGST, setIncludeGST] = useState(false);
   const [includeCGST, setIncludeCGST] = useState(false);
   const [finalamount, setFinalAmount] = useState(0);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!itemname.trim()) newErrors.itemname = "Item name is required";
+    if (!HUIDname.trim() || (HUIDname.length > 6 || HUIDname.length < 6) ) newErrors.HUIDname = "HUID is required";
+    if (!Weight || isNaN(Weight) || Number(Weight) <= 0)
+      newErrors.Weight = "Enter valid weight";
+    if (!rate || isNaN(rate) || Number(rate) <= 0)
+      newErrors.rate = "Enter valid rate";
+    if (!makingCharges || isNaN(makingCharges) || Number(makingCharges) < 0)
+      newErrors.makingCharges = "Enter valid making charges";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // Return true if no errors
+  };
 
   const addItem = () => {
     setItems([...items, { id: items.length + 1 }]);
   };
 
   const clearItems = () => {
+    setFinalAmount()
+    setIncludeGST(false)
+    setIncludeCGST(false)
     setItems([]);
   };
 
@@ -46,33 +71,72 @@ export default function Calculator() {
     finalamount: finalamount,
   };
 
-  const handlenextbutton = () => {
+  const generateInvoiceHTML = async (formdata) => {
+    try {
+      // Load the HTML file from assets
+      const htmlAsset = Asset.fromModule(require("@/assets/templates/invoice.html"));
+      await htmlAsset.downloadAsync();
+      const htmlContent = await FileSystem.readAsStringAsync(htmlAsset.localUri);
+  
+      // Inject form data dynamically
+      const populatedHTML = htmlContent
+        .replace("{{itemname}}", formdata.itemname || "N/A")
+        .replace("{{HUID}}", formdata.HUID || "N/A")
+        .replace("{{weight}}", formdata.weight || "0")
+        .replace("{{rate}}", formdata.rate || "0")
+        .replace("{{makingCharges}}", formdata.makingCharges || "0")
+        .replace("{{finalamount}}", formdata.finalamount || "0");
+  
+      return populatedHTML;
+    } catch (error) {
+      console.error("Error loading HTML file:", error);
+      return "<h1>Error loading invoice</h1>";
+    }
+  };
+
+
+  // const HTML = `
+  // <html>
+  // <body>
+  // <h1>${itemname}</h1>
+  // </body>
+  // </html>
+  // `;
+
+  const printToFile = async () => {
+    try {
+      console.log("Next button clicked!!!!");
+      const html = await generateInvoiceHTML(formdata);
+      // On iOS/android prints the given html. On web prints the HTML from the current page.
+      const { uri } = await Print.printToFileAsync({
+        html: html,
+        base64: false,
+      });
+      console.log("File has been saved to:", uri);
+      await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
+    } catch (error) {
+      ToastAndroid.show("Unable to Print PDF!!", ToastAndroid.SHORT);
+    }
+  };
+
+  const handlenextbutton = async () => {
+    await printToFile();
     console.log(
       "The form data =====>>>" + formdata.HUID,
       formdata.rate,
       formdata.weight,
       formdata.makingChargeType,
       formdata.itemtype
+    
     );
   };
 
-  // const handleGetAmount = () => {
-  //   let totalamountpergram = 0;
-  //   let totalmakingpergram = 0;
-  //   totalamountpergram = Weight * rate;
-  //   totalmakingpergram = Weight * makingCharges;
-  //   let finalamount =
-  //     totalamountpergram +
-  //     (makingChargeType == "Fixed" ? makingCharges : totalmakingpergram)
-
-  //   setFinalAmount(finalamount);
-  //   console.log("The total amount" + finalamount);
-  //   ToastAndroid.show("A pikachu appeared nearby !", ToastAndroid.SHORT);
-  // };
-
   const handleGetAmount = () => {
-    if (!Weight || !rate || !makingCharges) {
-      ToastAndroid.show("Please enter valid values!", ToastAndroid.SHORT);
+    if (!validateForm()) {
+      ToastAndroid.show(
+        "Please fix errors before proceeding!",
+        ToastAndroid.SHORT
+      );
       return;
     }
 
@@ -121,6 +185,7 @@ export default function Calculator() {
       {items.map((item, index) => (
         <View key={item.id} style={styles.itemContainer}>
           <Text style={styles.itemTitle}>Item {index + 1}</Text>
+
           <View style={styles.row}>
             <View style={styles.pickerContainer}>
               <Picker
@@ -134,25 +199,39 @@ export default function Calculator() {
             </View>
 
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { borderColor: errors.itemname ? "red" : "black" },
+              ]}
               placeholder="Item Name"
               onChangeText={(newText) => setItemname(newText)}
             />
+            {/* {errors.itemname && <Text style={styles.errorText}>{errors.itemname}</Text>} */}
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { borderColor: errors.HUIDname ? "red" : "black" },
+              ]}
               placeholder="HUID Num"
               onChangeText={(huid) => setHUIDname(huid)}
             />
           </View>
+
           <View style={styles.row}>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { borderColor: errors.Weight ? "red" : "black" },
+              ]}
               placeholder="Weight (g)"
               keyboardType="numeric"
               onChangeText={(weight) => setWeight(parseInt(weight) || 0)}
             />
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                { borderColor: errors.rate ? "red" : "black" },
+              ]}
               placeholder="Rate (₹/g)"
               keyboardType="numeric"
               onChangeText={(rate) => setRate(parseInt(rate) || 0)}
@@ -170,7 +249,10 @@ export default function Calculator() {
               </Picker>
             </View>
             <TextInput
-              style={styles.input}
+               style={[
+                styles.input,
+                { borderColor: errors.rate ? "red" : "black" },
+              ]}
               placeholder="Making Charges"
               keyboardType="numeric"
               onChangeText={(charges) =>
@@ -220,15 +302,20 @@ export default function Calculator() {
 
       <View style={styles.line} />
 
-
       {finalamount ? (
-        <View style={{marginBottom:20, flexDirection:'row', justifyContent:'space-between'}}>
+        <View
+          style={{
+            marginBottom: 20,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
           <View>
-          <Text style={styles.totalTitle}>Total Amount:</Text>
+            <Text style={styles.totalTitle}>Total Amount:</Text>
           </View>
-         
+
           <View>
-          <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
+            <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
           </View>
         </View>
       ) : null}
@@ -254,14 +341,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#8a2be2",
     padding: 15,
   },
-  headerTitle: { color: "black", fontSize: 16, fontWeight: "500" },
-  totalTitle: { color: "black", fontSize: 18, fontWeight: "800" },
+  headerTitle: { color: "black", fontSize: 16, fontWeight: "600" },
+  totalTitle: { color: "black", fontSize: 18, fontWeight: "800",fontFamily:'SpaceMono-Regular'  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginVertical: 10,
   },
   itemContainer: {
+    justifyContent:'space-around',
+    height:250,
     borderWidth: 1,
     padding: 10,
     borderRadius: 10,
