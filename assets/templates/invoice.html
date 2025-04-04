@@ -48,9 +48,9 @@
             <p>GSTIN: 09AIEPB1431G1ZU | Mob: 9718186568, 8800186763</p>
         </div>
 
-        <p><strong>M/s:</strong> _________________________</p>
-        <p><strong>GSTIN:</strong> ________________________</p>
-        <p><strong>Bill No:</strong> <span>085</span> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> ____/____/2024-25</p>
+        <p><strong>M/s:</strong> <u>_________________________</u></p>
+        <p><strong>GSTIN:</strong> <u>09AIEPB1431G1ZU</u></p>
+        <p><strong>Bill No:</strong> <span><u>{{billnumber}}</u></span> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> <u>{{date}}/{{month}}/{{year}}</u></p>
 
         <table>
             <tr>
@@ -65,13 +65,13 @@
             </tr>
             <tr>
                 <td>1</td>
-                <td></td>
-                <td>7113</td>
+                <td>{{itemname}}</td>
+                <td>{{HUID}}</td>
                 <td>916</td>
                 <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td>{{rate}}</td>
+                <td>{{makingCharges}}</td>
+                <td>{{finalamount}}</td>
             </tr>
         </table>
 
@@ -96,7 +96,7 @@
             </tr>
             <tr>
                 <th>G.TOTAL</th>
-                <td></td>
+                <td>{{finalamount}}</td>
             </tr>
         </table>
 
