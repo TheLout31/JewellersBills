@@ -48,55 +48,50 @@
             <p>GSTIN: 09AIEPB1431G1ZU | Mob: 9718186568, 8800186763</p>
         </div>
 
-        <p><strong>M/s:</strong> <u>_________________________</u></p>
-        <p><strong>GSTIN:</strong> <u>09AIEPB1431G1ZU</u></p>
-        <p><strong>Bill No:</strong> <span><u>{{billnumber}}</u></span> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> <u>{{date}}/{{month}}/{{year}}</u></p>
+        <p><strong>M/s:</strong> {{custName}}</p>
+        <p><strong>Phone Number:</strong> {{PhoneNumber}}</p>
+        <p><strong>GSTIN:</strong>_________________________</p>
+        <p><strong>Bill No:</strong> <span><u>{{billnumber}}</u></span> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> {{date}}/{{month}}/{{year}}-26</p>
 
         <table>
-            <tr>
-                <th>S. No</th>
-                <th>Description of Goods</th>
-                <th>HSN Code</th>
-                <th>Purity</th>
-                <th>Qty.</th>
-                <th>Rate</th>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Item</th>
+                <th>HUID</th>
+                <th>Weight</th>
+                <th>Rate/g</th>
                 <th>Making Charges</th>
                 <th>Amount</th>
-            </tr>
-            <tr>
-                <td>1</td>
-                <td>{{itemname}}</td>
-                <td>{{HUID}}</td>
-                <td>916</td>
-                <td></td>
-                <td>{{rate}}</td>
-                <td>{{makingCharges}}</td>
-                <td>{{finalamount}}</td>
-            </tr>
-        </table>
+              </tr>
+            </thead>
+            <tbody>
+              {{items}}
+            </tbody>
+          </table>
 
-        <p><strong>Payment By:</strong> Cash _______ Cheque No ______ Date ______</p>
+        <p><strong>Payment By:</strong> Cash _______ Cheque No ______ Date {{Paydate}}/{{Paymonth}}/{{Payyear}}</p>
 
         <table>
             <tr>
                 <th>Total</th>
-                <td></td>
+                <td>{{total_amount}}</td>
             </tr>
             <tr>
                 <th>CGST 1.5%</th>
-                <td></td>
+                <td>{{CGST}}</td>
             </tr>
             <tr>
                 <th>SGST 1.5%</th>
-                <td></td>
+                <td>{{SGST}}</td>
             </tr>
             <tr>
                 <th>IGST</th>
-                <td></td>
+                <td>{{IGST}}</td>
             </tr>
             <tr>
                 <th>G.TOTAL</th>
-                <td>{{finalamount}}</td>
+                <td>Rs {{finalamount}}</td>
             </tr>
         </table>
 
