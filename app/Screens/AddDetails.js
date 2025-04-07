@@ -7,14 +7,38 @@ import * as FileSystem from "expo-file-system";
 import { printToFileAsync } from "expo-print";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AddDetails = ({ route }) => {
   const navigation = useNavigation();
   const { items, finalamount, includeGST, includeSGST, includeCGST } =
     route.params;
   const [name, setName] = useState("");
-  const [number, setNumber] = useState("+91 ");
+  const [number, setNumber] = useState("(+91) ");
+  const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
+
+  const padNumber = (num, length = 5) => String(num).padStart(length, "0");
+
+  const generateBillNumber = async () => {
+    const year = new Date().getFullYear(); // e.g. 2025
+    const key = `billCount-${year}`;
+  
+    try {
+      const storedCount = await AsyncStorage.getItem(key);
+      const count = storedCount ? parseInt(storedCount) + 1 : 1;
+  
+      const billNumber = `${year}${padNumber(count)}`;
+  
+      // Save the updated count
+      await AsyncStorage.setItem(key, count.toString());
+  
+      return billNumber;
+    } catch (error) {
+      console.error("Error generating bill number:", error);
+      return null;
+    }
+  };
 
   function percentage(additional, totalValue) {
     let t = (additional / 100) * totalValue;
@@ -52,10 +76,19 @@ const AddDetails = ({ route }) => {
       </tr>`
         )
         .join("");
-      const billnum = (Math.random() + 1).toString(36).substring(3);
+      const billNumber = await generateBillNumber();
       const date = todaydate.getDate();
       const month = todaydate.getMonth();
       const year = todaydate.getFullYear();
+      const GST = function (){
+        
+        if (includeGST) {
+          return percentage(3, finalamount).toFixed(1);
+        } else {
+          if (includeSGST) return percentage(1.5, finalamount).toFixed(1);
+          if (includeCGST) return percentage(1.5, finalamount).toFixed(1);
+        }
+      }      
       const GSTValue = (includeGST ? percentage(3, finalamount) : 0).toFixed(1);
       const CGSTValue = (
         includeCGST || includeSGST ? percentage(1.5, finalamount) : 0
@@ -66,6 +99,8 @@ const AddDetails = ({ route }) => {
       const populatedHTML = htmlContent
         .replace("{{custName}}", name || "N/A")
         .replace("{{PhoneNumber}}", number || "N/A")
+        .replace("{{Address}}", address || "N/A")
+        .replace("{{billnumber}}", billNumber || "N/A")
         .replace("{{date}}", date || "N/A")
         .replace("{{month}}", month || "N/A")
         .replace("{{year}}", year || "N/A")
@@ -74,9 +109,9 @@ const AddDetails = ({ route }) => {
         .replace("{{Payyear}}", year || "N/A")
         .replace("{{items}}", itemRows)
         .replace("{{total_amount}}", TheItemTotal_Amount || 0)
-        .replace("{{CGST}}", CGSTValue || 0)
-        .replace("{{SGST}}", CGSTValue || 0)
-        .replace("{{IGST}}", GSTValue || 0)
+        // .replace("{{CGST}}", CGSTValue || 0)
+        // .replace("{{SGST}}", CGSTValue || 0)
+        .replace("{{IGST}}", GST)
         .replace("{{finalamount}}", TheFinalAmount || 0);
 
       return populatedHTML;
@@ -128,10 +163,24 @@ const AddDetails = ({ route }) => {
             }}
           />
           <TextInput
-            label="Phone Number"
+            label="Phone No."
             value={number}
             onChangeText={setNumber}
             keyboardType="numeric"
+            mode="outlined"
+            style={styles.input}
+            theme={{
+              colors: {
+                text: "#black", // user-typed text color
+                primary: "#8a2be2", // active border & label color
+                placeholder: "#888", // label color when inactive
+              },
+            }}
+          />
+          <TextInput
+            label="Address"
+            value={address}
+            onChangeText={setAddress}
             mode="outlined"
             style={styles.input}
             theme={{
