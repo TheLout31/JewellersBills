@@ -5,6 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import Home from "../Screens/Home";
 import Calculator from "../Screens/Calculator";
 import AddDetails from "../Screens/AddDetails";
+import LiveGoldPrices from "../Screens/LiveGoldPrices"
 
 const Stack = createStackNavigator();
 
@@ -40,11 +41,26 @@ const StackNavigator = () => {
         }}
       />
 
+
       <Stack.Screen
         name="Details"
         component={AddDetails}
         options={{
           title: "Add Details", // Optional: Set the header title
+          headerStyle: {
+            backgroundColor: "#8a2be2", // Set the header background color
+          },
+          headerTintColor: "#fff", // Optional: Set the color of the title and back button
+          headerTitleStyle: {
+            fontWeight: "500", // Optional: Style the header title
+          },
+        }}
+      />
+      <Stack.Screen
+        name="LiveRate"
+        component={LiveGoldPrices}
+        options={{
+          title: "Live Gold Rate", // Optional: Set the header title
           headerStyle: {
             backgroundColor: "#8a2be2", // Set the header background color
           },

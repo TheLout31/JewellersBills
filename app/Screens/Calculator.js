@@ -15,9 +15,10 @@ import {
   Dialog,
   Portal,
   Paragraph,
+  Tooltip,
 } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import itemDetail from "@/components/ItemDetail"
+import itemDetail from "@/components/ItemDetail";
 import ItemDetail from "@/components/ItemDetail";
 
 export default function Calculator() {
@@ -27,19 +28,20 @@ export default function Calculator() {
       id: 1,
       itemtype: "Gold",
       itemname: "",
-      HUID: "",
-      weight: 0.0,
-      rate: 0.0,
+      HUID: 7113,
+      purity: 916,
+      weight: "",
+      rate: "",
       makingChargeType: "Percentage",
       makingCharges: 0.0,
-      totalMakingCharges:0.0,
+      totalMakingCharges: 0.0,
       totalamount: 0.0,
-      
     },
   ]);
-  const [beforeMakingCharge, setBeforeMakingCharge] = useState(0)
-  const [makingCharges, setMakingCharges] = useState(0)
-  const [currentGST, setCurrentGST] = useState(0)
+  const [beforeMakingCharge, setBeforeMakingCharge] = useState(0);
+  const [beforeGSTCharge, setBeforeGSTCharge] = useState(0);
+  const [makingCharges, setMakingCharges] = useState(0);
+  const [currentGST, setCurrentGST] = useState(0);
   const [includeGST, setIncludeGST] = useState(false);
   const [includeCGST, setIncludeCGST] = useState(false);
   const [includeSGST, setIncludeSGST] = useState(false);
@@ -58,14 +60,14 @@ export default function Calculator() {
         id: (Math.random() + 1).toString(36).substring(7),
         itemtype: "Gold",
         itemname: "",
-        HUID: "",
-        weight: 0,
-        rate: 0,
+        HUID: 7113,
+        purity: 916,
+        weight: "",
+        rate: "",
         makingChargeType: "Percentage",
-        makingCharges: 0,
-        totalMakingCharges:0.0,
+        makingCharges: "",
+        totalMakingCharges: 0.0,
         totalamount: 0,
-        
       },
     ]);
   };
@@ -73,7 +75,7 @@ export default function Calculator() {
   const clearItems = () => {
     setFinalAmount();
     setIncludeGST(false);
-    setIncludeCGST(false);
+    setIncludeSGST(false);
     setItems([]);
   };
 
@@ -86,9 +88,9 @@ export default function Calculator() {
     navigation.navigate("Details", {
       items: items,
       finalamount: finalamount,
-      includeGST:includeGST,
-      includeSGST:includeSGST,
-      includeCGST:includeCGST
+      beforeGSTCharge: beforeGSTCharge,
+      includeGST: includeGST,
+      includeSGST: includeSGST,
     });
   };
 
@@ -98,54 +100,122 @@ export default function Calculator() {
   }
 
   const handleGetAmount = () => {
-    let totalAmount = 0;
-    const updatedItems = items.map((item) => {
+    let hasErrors = false;
+    let totalBeforeGST = 0;
+    let updatedErrors = {};
+    let updatedItems = [];
+
+    const newItems = items.map((item, idx) => {
       let newErrors = {};
 
-      if (!item.itemname.trim()) newErrors.itemname = "Item name is required";
-      if (!item.HUID.trim() || item.HUID.length !== 6)
-        newErrors.HUID = "Invalid HUID";
-      if (!item.weight || isNaN(item.weight) || item.weight <= 0)
-        newErrors.weight = "Invalid weight";
-      if (!item.rate || isNaN(item.rate) || item.rate <= 0)
-        newErrors.rate = "Invalid rate";
-      setErrors(newErrors);
-      // skip invalid
-      if (Object.keys(newErrors).length > 0) {
-        setVisible(!visible);
-        return;
+      if (!item.itemname?.trim()) {
+        newErrors.itemname = "Item name is required";
       }
 
-      let total = item.weight * item.rate;
-      setBeforeMakingCharge(total)
-      let totalMakingCharges =percentage(item.makingCharges, total)
-      if (item.makingChargeType === "Percentage") {
-        totalAmount = total + totalMakingCharges;
-      } else if (item.makingChargeType === "Fixed") {
-        totalAmount = total + item.makingCharges;
+      if (!item.weight || isNaN(item.weight) || item.weight <= 0) {
+        newErrors.weight = "Invalid weight";
       }
-  
-      return { ...item, totalamount: totalAmount , totalMakingCharges:totalMakingCharges};
+
+      if (!item.rate || isNaN(item.rate) || item.rate <= 0) {
+        newErrors.rate = "Invalid rate";
+      }
+
+      if (Object.keys(newErrors).length > 0) {
+        updatedErrors[idx] = newErrors;
+        hasErrors = true;
+        return { ...item }; // Return unmodified item
+      }
+      let baseTotal = item.weight * item.rate;
+      let totalMakingCharges = 0;
+
+      if (item.makingChargeType === "Percentage") {
+        totalMakingCharges = percentage(item.makingCharges, baseTotal);
+      } else if (item.makingChargeType === "Fixed") {
+        totalMakingCharges = item.makingCharges;
+      }
+
+      const totalamount = baseTotal + totalMakingCharges;
+      totalBeforeGST += totalamount;
+
+      return {
+        ...item,
+        totalamount,
+        totalMakingCharges,
+      };
     });
 
-    setItems(updatedItems);
-    console.log("Items data after totalamount =====>>", items);
-
-    let totalFinal = updatedItems.reduce(
-      (sum, item) => sum + (item.totalamount || 0),
-      0
-    );
-
-    if (includeGST) {
-      totalFinal += percentage(3, totalFinal);
-    } else {
-      if (includeSGST) totalFinal += percentage(1.5, totalFinal);
-      if (includeCGST) totalFinal += percentage(1.5, totalFinal);
+    if (hasErrors) {
+      setErrors(updatedErrors);
+      setVisible(true); // show error modal or tooltip
+      return; // Stop execution if there are errors
     }
 
-    setFinalAmount(totalFinal);
+    setErrors({}); // clear errors
+    setItems(newItems);
+    setBeforeMakingCharge(totalBeforeGST);
+    setBeforeGSTCharge(totalBeforeGST);
+
+    let finalTotal = totalBeforeGST;
+
+    if (includeGST || includeSGST) {
+      finalTotal += percentage(3, totalBeforeGST);
+    }
+
+    setFinalAmount(finalTotal);
     setnextbtndisabled(false);
   };
+
+  // const handleGetAmount = () => {
+  //   let totalAmount = 0;
+
+  //   const updatedItems = items.map((item) => {
+  //     let newErrors = {};
+
+  //     if (!item.itemname.trim()) newErrors.itemname = "Item name is required";
+
+  //     if (!item.weight || isNaN(item.weight) || item.weight <= 0)
+  //       newErrors.weight = "Invalid weight";
+  //     if (!item.rate || isNaN(item.rate) || item.rate <= 0)
+  //       newErrors.rate = "Invalid rate";
+  //     setErrors(newErrors);
+  //     // skip invalid
+  //     if (Object.keys(newErrors).length > 0) {
+  //       setVisible(!visible);
+  //       return;
+  //     }
+
+  //     let total = item.weight * item.rate;
+  //     setBeforeMakingCharge(total)
+  //     let totalMakingCharges =percentage(item.makingCharges, total)
+  //     if (item.makingChargeType === "Percentage") {
+  //       totalAmount = total + totalMakingCharges;
+  //     } else if (item.makingChargeType === "Fixed") {
+  //       totalAmount = total + item.makingCharges;
+  //     }
+
+  //     return { ...item, totalamount: totalAmount , totalMakingCharges:totalMakingCharges};
+  //   });
+
+  //   setItems(updatedItems);
+  //   console.log("Items data after totalamount =====>>", items);
+
+  //   let totalFinal = updatedItems.reduce(
+  //     (sum, item) => sum + (item.totalamount || 0),
+  //     0
+  //   );
+
+  //   setBeforeGSTCharge(totalFinal);
+
+  //   if (includeGST) {
+  //     totalFinal += percentage(3, totalFinal);
+  //   } else {
+  //     if (includeSGST) totalFinal += percentage(3, totalFinal);
+  //     // if (includeCGST) totalFinal += percentage(1.5, totalFinal);
+  //   }
+
+  //   setFinalAmount(totalFinal);
+  //   setnextbtndisabled(false);
+  // };
 
   return (
     <ScrollView style={styles.container}>
@@ -225,22 +295,16 @@ export default function Calculator() {
                 setItems(newItems);
               }}
             />
-          
-            <TextInput
-              style={[
-                styles.input,
-                { borderColor: errors.HUIDname ? "red" : "black" },
-              ]}
-              placeholder="HUID Num"
-              maxLength={6}
-              minLength={6}
-              autoCapitalize="characters"
-              onChangeText={(text) => {
-                const newItems = [...items];
-                newItems[index].HUID = text;
-                setItems(newItems);
-              }}
-            />
+          </View>
+
+          <View style={styles.row}>
+            <View style={styles.input}>
+              <Text style={styles.fixedTitle}>7113</Text>
+            </View>
+
+            <View style={styles.input}>
+              <Text style={styles.fixedTitle}>916</Text>
+            </View>
           </View>
 
           <View style={styles.row}>
@@ -254,7 +318,7 @@ export default function Calculator() {
               // onChangeText={(weight) => setWeight(parseInt(weight) || 0)}
               onChangeText={(text) => {
                 const newItems = [...items];
-                newItems[index].weight = parseInt(text) || 0;
+                newItems[index].weight = parseFloat(text) || 0;
                 setItems(newItems);
               }}
             />
@@ -265,10 +329,9 @@ export default function Calculator() {
               ]}
               placeholder="Rate (₹/g)"
               keyboardType="numeric"
-             
               onChangeText={(text) => {
                 const newItems = [...items];
-                newItems[index].rate = parseInt(text) || 0;
+                newItems[index].rate = parseFloat(text) || 0;
                 setItems(newItems);
               }}
             />
@@ -278,7 +341,6 @@ export default function Calculator() {
               <Picker
                 selectedValue={item.makingChargeType}
                 style={styles.picker}
-                
                 onValueChange={(itemValue) => {
                   const newItems = [...items];
                   newItems[index].makingChargeType = itemValue;
@@ -302,7 +364,7 @@ export default function Calculator() {
               // }
               onChangeText={(text) => {
                 const newItems = [...items];
-                newItems[index].makingCharges = parseInt(text) || 0;
+                newItems[index].makingCharges = parseFloat(text) || 0;
                 setItems(newItems);
               }}
             />
@@ -314,7 +376,7 @@ export default function Calculator() {
       <View style={styles.checkboxContainer}>
         <View style={styles.gstContainer}>
           <Text style={styles.headerTitle}>
-            Include GST{" "}
+            Include IGST{" "}
             <Text
               style={{ fontSize: 12, fontWeight: "400", textAlign: "center" }}
             >
@@ -324,7 +386,7 @@ export default function Calculator() {
           <Checkbox
             status={includeGST ? "checked" : "unchecked"}
             onPress={() => {
-              setIncludeGST(!includeGST)
+              setIncludeGST(!includeGST);
             }}
           />
         </View>
@@ -356,10 +418,9 @@ export default function Calculator() {
             </Text>
           </Text>
           <Checkbox
-            status={includeCGST ? "checked" : "unchecked"}
+            status={includeSGST ? "checked" : "unchecked"}
             onPress={() => {
-              setIncludeCGST(!includeCGST);
-             
+              setIncludeSGST(!includeSGST);
             }}
           />
         </View>
@@ -368,37 +429,36 @@ export default function Calculator() {
       <View style={styles.line} />
 
       {finalamount ? (
-  <View>
-    {items.map((item, index) => {
-      const makingCharge =
-        item.makingChargeType === "Percentage"
-          ? item.totalMakingCharges
-          : item.makingCharges;
+        <View>
+          {items.map((item, index) => {
+            const makingCharge =
+              item.makingChargeType === "Percentage"
+                ? item.totalMakingCharges
+                : item.makingCharges;
 
-      return ItemDetail(
-        index,
-        item.itemname,
-        item.weight,
-        item.rate,
-        makingCharge,
-        item.totalamount
-      );
-    })}
+            return ItemDetail(
+              index,
+              item.itemname,
+              item.weight,
+              item.rate,
+              makingCharge,
+              item.totalamount
+            );
+          })}
 
-    {/* total amount */}
-    <View
-      style={{
-        marginBottom: 20,
-        flexDirection: "row",
-        justifyContent: "space-between",
-      }}
-    >
-      <Text style={styles.totalTitle}>Total Amount:</Text>
-      <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
-    </View>
-  </View>
-) : null}
-
+          {/* total amount */}
+          <View
+            style={{
+              marginBottom: 20,
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={styles.totalTitle}>Total Amount:</Text>
+            <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
+          </View>
+        </View>
+      ) : null}
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
@@ -448,6 +508,7 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   headerTitle: { color: "black", fontSize: 16, fontWeight: "600" },
+  fixedTitle: { color: "#71797E", fontSize: 16, fontWeight: "600" },
   totalTitle: {
     color: "black",
     fontSize: 18,
@@ -462,7 +523,7 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     justifyContent: "space-around",
-    height: 250,
+
     borderWidth: 1,
     padding: 10,
     borderRadius: 10,
@@ -474,6 +535,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 10,
   },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 4,
+    color: "#333",
+  },
   input: {
     flex: 1,
     borderWidth: 1,
@@ -482,6 +549,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     fontSize: 16,
     fontWeight: "600",
+    justifyContent: "center",
   },
   pickerContainer: {
     flex: 1,
@@ -490,7 +558,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginHorizontal: 5,
   },
-  picker: { width: 150, height: 50, fontWeight: "600" },
+  picker: { height: 50, fontWeight: "600" },
   gstContainer: {
     flexDirection: "row",
     alignItems: "center",

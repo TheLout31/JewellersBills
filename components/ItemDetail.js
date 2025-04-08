@@ -1,7 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-export default function ItemDetail(index, itemname , Value1,Value2 ,makingCharge , Total ) {
+export default function ItemDetail(index, itemname , Value1,Value2 ,makingCharge , Total )
+
+{
+  let total = parseFloat(Value1 * Value2)
   return (
     <View key={index} style={{padding:15}}>
               <View
@@ -26,7 +29,7 @@ export default function ItemDetail(index, itemname , Value1,Value2 ,makingCharge
 
                 <View>
                   <Text style={styles.value}>
-                    {Value1 *Value2}
+                    {total}
                   </Text>
                 </View>
               </View>

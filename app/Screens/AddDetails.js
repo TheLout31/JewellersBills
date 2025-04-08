@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const AddDetails = ({ route }) => {
   const navigation = useNavigation();
-  const { items, finalamount, includeGST, includeSGST, includeCGST } =
+  const { items, finalamount, includeGST, includeSGST, beforeGSTCharge} =
     route.params;
   const [name, setName] = useState("");
   const [number, setNumber] = useState("(+91) ");
@@ -23,16 +23,16 @@ const AddDetails = ({ route }) => {
   const generateBillNumber = async () => {
     const year = new Date().getFullYear(); // e.g. 2025
     const key = `billCount-${year}`;
-  
+
     try {
       const storedCount = await AsyncStorage.getItem(key);
       const count = storedCount ? parseInt(storedCount) + 1 : 1;
-  
+
       const billNumber = `${year}${padNumber(count)}`;
-  
+
       // Save the updated count
       await AsyncStorage.setItem(key, count.toString());
-  
+
       return billNumber;
     } catch (error) {
       console.error("Error generating bill number:", error);
@@ -62,6 +62,15 @@ const AddDetails = ({ route }) => {
       const htmlContent = await FileSystem.readAsStringAsync(
         htmlAsset.localUri
       );
+      const GST = function () {
+        if (includeGST) {
+          return percentage(3.0, beforeGSTCharge).toFixed(1);
+        } else if (includeSGST) {
+          return percentage(1.5, beforeGSTCharge).toFixed(1);
+        } else {
+          return (0).toFixed(1); // explicitly return 0
+        }
+      };
       const itemRows = items
         .map(
           (item, idx) => `
@@ -69,31 +78,37 @@ const AddDetails = ({ route }) => {
         <td>${idx + 1}</td>
         <td>${item.itemname}</td>
         <td>${item.HUID}</td>
+        <td>${item.purity}</td>
         <td>${item.weight}g</td>
         <td>Rs ${item.rate}</td>
         <td>${item.makingCharges}%</td>
-        <td>Rs ${item.totalamount}</td>
+        <td>Rs ${(item.totalamount).toFixed(2)}</td>
       </tr>`
         )
         .join("");
+
+      // Conditional SGST & CGST rows
+      const SGSTRows = includeSGST
+  ? `
+    <tr>
+      <th>CGST 1.5%</th>
+      <td>Rs ${GST()}</td>
+    </tr>
+    <tr>
+      <th>SGST 1.5%</th>
+      <td>Rs ${GST()}</td>
+    </tr>`
+  : `
+    <tr>
+      <th>IGST</th>
+      <td>Rs ${GST()}</td>
+    </tr>`;
+
       const billNumber = await generateBillNumber();
       const date = todaydate.getDate();
       const month = todaydate.getMonth();
       const year = todaydate.getFullYear();
-      const GST = function (){
-        
-        if (includeGST) {
-          return percentage(3, finalamount).toFixed(1);
-        } else {
-          if (includeSGST) return percentage(1.5, finalamount).toFixed(1);
-          if (includeCGST) return percentage(1.5, finalamount).toFixed(1);
-        }
-      }      
-      const GSTValue = (includeGST ? percentage(3, finalamount) : 0).toFixed(1);
-      const CGSTValue = (
-        includeCGST || includeSGST ? percentage(1.5, finalamount) : 0
-      ).toFixed(1);
-      const IGSTValue = (CGSTValue * 2).toFixed(1);
+
       const TheFinalAmount = finalamount.toFixed(1);
       // Inject form data dynamically
       const populatedHTML = htmlContent
@@ -111,7 +126,7 @@ const AddDetails = ({ route }) => {
         .replace("{{total_amount}}", TheItemTotal_Amount || 0)
         // .replace("{{CGST}}", CGSTValue || 0)
         // .replace("{{SGST}}", CGSTValue || 0)
-        .replace("{{IGST}}", GST)
+        .replace("{{IGST}}", SGSTRows)
         .replace("{{finalamount}}", TheFinalAmount || 0);
 
       return populatedHTML;

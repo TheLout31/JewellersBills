@@ -51,7 +51,7 @@
         <p><strong>M/s:</strong> {{custName}}</p>
         <p><strong>Phone Number:</strong> {{PhoneNumber}}</p>
         <p><strong>Address:</strong> {{Address}}</p>
-        <p><strong>GSTIN:</strong>_________________________</p>
+        <!-- <p><strong>GSTIN:</strong>_________________________</p> -->
         <p><strong>Bill No:</strong> <span>{{billnumber}}</span> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> {{date}}/{{month}}/{{year}}-26</p>
 
         <table>
@@ -59,7 +59,8 @@
               <tr>
                 <th>#</th>
                 <th>Item</th>
-                <th>HUID</th>
+                <th>HSN</th>
+                <th>Purity</th>
                 <th>Weight</th>
                 <th>Rate/g</th>
                 <th>Making Charges</th>
@@ -78,6 +79,9 @@
                 <th>Total</th>
                 <td>Rs {{total_amount}}</td>
             </tr>
+            <tbody>
+                {{IGST}}
+              </tbody>
             <!-- <tr>
                 <th>CGST 1.5%</th>
                 <td>{{CGST}}</td>
@@ -85,11 +89,11 @@
             <tr>
                 <th>SGST 1.5%</th>
                 <td>{{SGST}}</td>
-            </tr> -->
+            </tr>
             <tr>
                 <th>GST</th>
                 <td>Rs {{IGST}}</td>
-            </tr>
+            </tr> -->
             <tr>
                 <th>G.TOTAL</th>
                 <td>Rs {{finalamount}}</td>

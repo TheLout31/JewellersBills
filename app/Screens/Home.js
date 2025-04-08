@@ -7,6 +7,9 @@ export default function Home({navigation}) {
   const Calculatorhandler=()=>{
     navigation.navigate("Calculator")
   }
+  const handleLiveRate=()=>{
+    navigation.navigate("LiveRate")
+  }
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ flex: 1, padding: 10, backgroundColor: "white" }}>
@@ -28,6 +31,7 @@ export default function Home({navigation}) {
           </TouchableOpacity>
 
           <TouchableOpacity
+           onPress={handleLiveRate}
             style={{ height: 100, borderRadius: 16, padding:10 ,alignItems:'center', justifyContent:'center',borderWidth:2, borderColor:'#6F5AAA', }}
           >
             <Text style={{ fontSize: 18, fontWeight: "500" }}>
