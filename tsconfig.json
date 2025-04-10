@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/Screens/Calculator.js", "app/Screens/Home.js", "components/ItemDetail.js"  ]
+, "app/Screens/Calculator.js", "app/Screens/Home.js", "components/ItemDetail.js", "app/Navigation/stackNavigation.js"  ]
 }

@@ -50,8 +50,9 @@
 
         <p><strong>M/s:</strong> {{custName}}</p>
         <p><strong>Phone Number:</strong> {{PhoneNumber}}</p>
+        <p><strong>Address:</strong> {{Address}}</p>
         <p><strong>GSTIN:</strong>_________________________</p>
-        <p><strong>Bill No:</strong> <span><u>{{billnumber}}</u></span> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> {{date}}/{{month}}/{{year}}-26</p>
+        <p><strong>Bill No:</strong> <span>{{billnumber}}</span> &nbsp;&nbsp;&nbsp;&nbsp; <strong>Date:</strong> {{date}}/{{month}}/{{year}}-26</p>
 
         <table>
             <thead>
@@ -75,19 +76,19 @@
         <table>
             <tr>
                 <th>Total</th>
-                <td>{{total_amount}}</td>
+                <td>Rs {{total_amount}}</td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <th>CGST 1.5%</th>
                 <td>{{CGST}}</td>
             </tr>
             <tr>
                 <th>SGST 1.5%</th>
                 <td>{{SGST}}</td>
-            </tr>
+            </tr> -->
             <tr>
-                <th>IGST</th>
-                <td>{{IGST}}</td>
+                <th>GST</th>
+                <td>Rs {{IGST}}</td>
             </tr>
             <tr>
                 <th>G.TOTAL</th>

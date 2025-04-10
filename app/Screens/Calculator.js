@@ -20,6 +20,7 @@ import { useNavigation } from "@react-navigation/native";
 import itemDetail from "@/components/ItemDetail"
 import ItemDetail from "@/components/ItemDetail";
 
+
 export default function Calculator() {
   const navigation = useNavigation();
   const [items, setItems] = useState([
@@ -32,10 +33,9 @@ export default function Calculator() {
       rate: 0.0,
       makingChargeType: "Percentage",
       makingCharges: 0.0,
+      totalMakingCharges:0.0,
       totalamount: 0.0,
-      includeGST:false,
-      includeSGST:false,
-      includeCGST:false
+      
     },
   ]);
   const [beforeMakingCharge, setBeforeMakingCharge] = useState(0)
@@ -49,6 +49,7 @@ export default function Calculator() {
   const [BillNumber, setBillNUmber] = useState(0);
   const [errors, setErrors] = useState({});
   const [visible, setVisible] = useState(false);
+
 
   const hideDialog = () => setVisible(false);
 
@@ -64,6 +65,7 @@ export default function Calculator() {
         rate: 0,
         makingChargeType: "Percentage",
         makingCharges: 0,
+        totalMakingCharges:0.0,
         totalamount: 0,
         
       },
@@ -118,23 +120,14 @@ export default function Calculator() {
 
       let total = item.weight * item.rate;
       setBeforeMakingCharge(total)
-      setMakingCharges(percentage(item.makingCharges, total))
+      let totalMakingCharges =percentage(item.makingCharges, total)
       if (item.makingChargeType === "Percentage") {
-        totalAmount = total + percentage(item.makingCharges, total);
+        totalAmount = total + totalMakingCharges;
       } else if (item.makingChargeType === "Fixed") {
         totalAmount = total + item.makingCharges;
       }
-      // if (includeGST) {
-      //   setCurrentGST(percentage(3,totalAmount))
-      // } else if (includeCGST || includeSGST) {
-      //   setCurrentGST(percentage(1.5,totalAmount))
-      // }
-      // else{
-      //   setCurrentGST(0)
-      // }
-      
-      
-      return { ...item, totalamount: totalAmount };
+  
+      return { ...item, totalamount: totalAmount , totalMakingCharges:totalMakingCharges};
     });
 
     setItems(updatedItems);
@@ -377,29 +370,37 @@ export default function Calculator() {
       <View style={styles.line} />
 
       {finalamount ? (
-        <View>
-          {items.map((item, index) => (
-            ItemDetail(index, item.itemname ,item.weight, item.rate ,makingCharges , item.totalamount)
-          ))}
+  <View>
+    {items.map((item, index) => {
+      const makingCharge =
+        item.makingChargeType === "Percentage"
+          ? item.totalMakingCharges
+          : item.makingCharges;
 
-          {/* total amount */}
-          <View
-            style={{
-              marginBottom: 20,
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <View>
-              <Text style={styles.totalTitle}>Total Amount:</Text>
-            </View>
+      return ItemDetail(
+        index,
+        item.itemname,
+        item.weight,
+        item.rate,
+        makingCharge,
+        item.totalamount
+      );
+    })}
 
-            <View>
-              <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
-            </View>
-          </View>
-        </View>
-      ) : null}
+    {/* total amount */}
+    <View
+      style={{
+        marginBottom: 20,
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
+    >
+      <Text style={styles.totalTitle}>Total Amount:</Text>
+      <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
+    </View>
+  </View>
+) : null}
+
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
