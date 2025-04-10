@@ -64,9 +64,9 @@ const AddDetails = ({ route }) => {
       );
       const GST = function () {
         if (includeGST) {
-          return percentage(3.0, beforeGSTCharge).toFixed(1);
+          return percentage(3.0, beforeGSTCharge).toFixed(2);
         } else if (includeSGST) {
-          return percentage(1.5, beforeGSTCharge).toFixed(1);
+          return percentage(1.5, beforeGSTCharge).toFixed(2);
         } else {
           return (0).toFixed(1); // explicitly return 0
         }
@@ -108,8 +108,10 @@ const AddDetails = ({ route }) => {
       const date = todaydate.getDate();
       const month = todaydate.getMonth();
       const year = todaydate.getFullYear();
+      const total_amount = TheItemTotal_Amount().toFixed(2);
 
-      const TheFinalAmount = finalamount.toFixed(1);
+
+      const TheFinalAmount = finalamount.toFixed(2);
       // Inject form data dynamically
       const populatedHTML = htmlContent
         .replace("{{custName}}", name || "N/A")
@@ -123,11 +125,11 @@ const AddDetails = ({ route }) => {
         .replace("{{Paymonth}}", month || "N/A")
         .replace("{{Payyear}}", year || "N/A")
         .replace("{{items}}", itemRows)
-        .replace("{{total_amount}}", TheItemTotal_Amount || 0)
+        .replace("{{total_amount}}", total_amount || "0.00")
         // .replace("{{CGST}}", CGSTValue || 0)
         // .replace("{{SGST}}", CGSTValue || 0)
         .replace("{{IGST}}", SGSTRows)
-        .replace("{{finalamount}}", TheFinalAmount || 0);
+        .replace("{{finalamount}}", TheFinalAmount || "0.00");
 
       return populatedHTML;
     } catch (error) {

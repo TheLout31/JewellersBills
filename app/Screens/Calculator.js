@@ -348,7 +348,7 @@ export default function Calculator() {
                 }}
               >
                 <Picker.Item label="Percentage" value="Percentage" />
-                <Picker.Item label="Per Gram" value="PerGram" />
+               
                 <Picker.Item label="Fixed" value="Fixed" />
               </Picker>
             </View>
@@ -455,7 +455,7 @@ export default function Calculator() {
             }}
           >
             <Text style={styles.totalTitle}>Total Amount:</Text>
-            <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
+            <Text style={styles.totalTitle}>₹{finalamount.toFixed(2)}</Text>
           </View>
         </View>
       ) : null}
