@@ -10,12 +10,13 @@ import { auth } from "../../Firebase/FirebaseConfig";
 import React from "react";
 
 export default function Home({ navigation }) {
-  const Calculatorhandler = () => {
-    navigation.navigate("Calculator");
-  };
+  // const Calculatorhandler = () => {
+  //   navigation.navigate("Calculator");
+  // };
 
   const dummyHandler = (title) => {
     console.log(`${title} pressed`);
+    navigation.navigate(`${title}`);
   };
 
   return (
@@ -26,7 +27,7 @@ export default function Home({ navigation }) {
         </View>
 
         <View style={styles.cardContainer}>
-          <TouchableOpacity style={styles.card} onPress={Calculatorhandler}>
+          <TouchableOpacity style={styles.card} onPress={()=>dummyHandler("Calculator")}>
             <Text style={styles.cardText}>Calculator and Bill Generator</Text>
           </TouchableOpacity>
 
@@ -36,7 +37,7 @@ export default function Home({ navigation }) {
         </View>
 
         <View style={styles.cardContainer}>
-          <TouchableOpacity style={styles.card} onPress={() => dummyHandler('My Orders')}>
+          <TouchableOpacity style={styles.card} onPress={() => dummyHandler('Orders')}>
             <Text style={styles.cardText}>My Orders</Text>
           </TouchableOpacity>
 

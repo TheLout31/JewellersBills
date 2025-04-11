@@ -8,6 +8,9 @@ import { printToFileAsync } from "expo-print";
 import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { database } from "@/Firebase/FirebaseConfig";
+import { addDoc, collection } from "firebase/firestore";
+import { auth } from "@/Firebase/FirebaseConfig";
 
 const AddDetails = ({ route }) => {
   const navigation = useNavigation();
@@ -17,22 +20,43 @@ const AddDetails = ({ route }) => {
   const [number, setNumber] = useState("(+91) ");
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
-
+  const user = auth.currentUser
   const padNumber = (num, length = 5) => String(num).padStart(length, "0");
+
+  const addOrders = async () => {
+    try {
+      if (user) {
+        const userId = user.uid;
+        const orderCollection = collection(database, "users", userId, "orders");
+        await addDoc(orderCollection, {
+          name: name,
+          number: number,
+          address: address,
+          items: items,
+          finalamount: finalamount,
+        });
+      } else {
+        console.log("No user logged in!!!!");
+      }
+      console.log("Item added!!!!");
+    } catch (error) {
+      console.log("Error adding data!!!");
+    }
+  };
 
   const generateBillNumber = async () => {
     const year = new Date().getFullYear(); // e.g. 2025
     const key = `billCount-${year}`;
-  
+
     try {
       const storedCount = await AsyncStorage.getItem(key);
       const count = storedCount ? parseInt(storedCount) + 1 : 1;
-  
+
       const billNumber = `${year}${padNumber(count)}`;
-  
+
       // Save the updated count
       await AsyncStorage.setItem(key, count.toString());
-  
+
       return billNumber;
     } catch (error) {
       console.error("Error generating bill number:", error);
@@ -80,15 +104,14 @@ const AddDetails = ({ route }) => {
       const date = todaydate.getDate();
       const month = todaydate.getMonth();
       const year = todaydate.getFullYear();
-      const GST = function (){
-        
+      const GST = function () {
         if (includeGST) {
           return percentage(3, finalamount).toFixed(1);
         } else {
           if (includeSGST) return percentage(1.5, finalamount).toFixed(1);
           if (includeCGST) return percentage(1.5, finalamount).toFixed(1);
         }
-      }      
+      };
       const GSTValue = (includeGST ? percentage(3, finalamount) : 0).toFixed(1);
       const CGSTValue = (
         includeCGST || includeSGST ? percentage(1.5, finalamount) : 0
@@ -139,8 +162,10 @@ const AddDetails = ({ route }) => {
 
   const handleGeneratePDF = async () => {
     // Your PDF generation logic goes here
-    console.log("Screen adddetails items data ====>>>", items);
-    await printToFile();
+    // console.log("Screen adddetails items data ====>>>", items);
+    // await printToFile();
+    console.log("user details in Add detials=====>", user);
+    addOrders();
   };
 
   return (
