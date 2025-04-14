@@ -6,7 +6,8 @@ import Home from "../Screens/Home";
 import Calculator from "../Screens/Calculator";
 import AddDetails from "../Screens/AddDetails";
 import AuthScreen from "../Screens/LoginScreens/AuthScreen";
-import MyOrders from "../Screens/MyOrders"
+import MyOrders from "../Screens/MyOrders";
+import LiveGoldPrices from "../Screens/LiveGoldPrices"
 import { auth } from "../../Firebase/FirebaseConfig";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import {
@@ -119,6 +120,21 @@ const StackNavigator = ({ navigation }) => {
               component={MyOrders}
               options={{
                 title: "My Orders", // Optional: Set the header title
+                headerStyle: {
+                  backgroundColor: "#8a2be2", // Set the header background color
+                },
+                headerTintColor: "#fff", // Optional: Set the color of the title and back button
+                headerTitleStyle: {
+                  fontWeight: "500", // Optional: Style the header title
+                },
+              }}
+            />
+
+            <Stack.Screen
+              name="LiveRate"
+              component={LiveGoldPrices}
+              options={{
+                title: "LiveRate", // Optional: Set the header title
                 headerStyle: {
                   backgroundColor: "#8a2be2", // Set the header background color
                 },

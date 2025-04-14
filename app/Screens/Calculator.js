@@ -256,7 +256,7 @@ export default function Calculator() {
               // onChangeText={(weight) => setWeight(parseInt(weight) || 0)}
               onChangeText={(text) => {
                 const newItems = [...items];
-                newItems[index].weight = parseInt(text) || 0;
+                newItems[index].weight = parseFloat(text) || 0;
                 setItems(newItems);
               }}
             />
@@ -270,7 +270,7 @@ export default function Calculator() {
              
               onChangeText={(text) => {
                 const newItems = [...items];
-                newItems[index].rate = parseInt(text) || 0;
+                newItems[index].rate = parseFloat(text) || 0;
                 setItems(newItems);
               }}
             />
@@ -304,7 +304,7 @@ export default function Calculator() {
               // }
               onChangeText={(text) => {
                 const newItems = [...items];
-                newItems[index].makingCharges = parseInt(text) || 0;
+                newItems[index].makingCharges = parseFloat(text) || 0;
                 setItems(newItems);
               }}
             />
@@ -396,7 +396,7 @@ export default function Calculator() {
       }}
     >
       <Text style={styles.totalTitle}>Total Amount:</Text>
-      <Text style={styles.totalTitle}>₹{finalamount.toFixed(1)}</Text>
+      <Text style={styles.totalTitle}>₹{finalamount.toFixed(2)}</Text>
     </View>
   </View>
 ) : null}

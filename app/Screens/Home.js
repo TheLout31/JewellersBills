@@ -31,7 +31,7 @@ export default function Home({ navigation }) {
             <Text style={styles.cardText}>Calculator and Bill Generator</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.card} onPress={() => dummyHandler('Live Gold Rate')}>
+          <TouchableOpacity style={styles.card} onPress={() => dummyHandler('LiveRate')}>
             <Text style={styles.cardText}>Live Gold Rate</Text>
           </TouchableOpacity>
         </View>

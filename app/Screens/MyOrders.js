@@ -1,76 +1,84 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { Card } from "react-native-paper";
+import { Card, IconButton } from "react-native-paper";
 import { database } from "@/Firebase/FirebaseConfig";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { auth } from "@/Firebase/FirebaseConfig";
-
-const orders = [
-  {
-    id: "1",
-    name: "John Doe",
-    number: "+1234567890",
-    address: "123 Main St, Cityville",
-    items: ["Shampoo", "Conditioner"],
-    finalamount: 1299,
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    number: "+0987654321",
-    address: "456 Elm St, Townburg",
-    items: ["Face Wash", "Moisturizer"],
-    finalamount: 799,
-  },
-  // Add more orders here
-];
-
-
+import { Asset } from "expo-asset";
+import * as FileSystem from "expo-file-system";
+import { printToFileAsync } from "expo-print";
+import * as Print from "expo-print";
+import { shareAsync } from "expo-sharing";
 
 const MyOrders = () => {
   const user = auth.currentUser;
   const orderCollection = collection(database, "Orders");
   const [ordersList, setOrdersList] = useState([]);
 
+  const printToFile = async (html) => {
+    try {
+      console.log("Download clicked!!!!");
+      // On iOS/android prints the given html. On web prints the HTML from the current page.
+      const { uri } = await Print.printToFileAsync({
+        html: html,
+        base64: false,
+      });
+
+      console.log("File has been saved to:", uri);
+      await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
+    } catch (error) {
+      ToastAndroid.show("Unable to Print PDF!!", ToastAndroid.SHORT);
+    }
+  };
+
   const OrderCard = ({ order }) => {
     return (
       <Card style={styles.card}>
-        <Card.Content>
-          <Text style={styles.name}>{order.name}</Text>
-          <Text style={styles.text}>📞 {order.number}</Text>
-          <Text style={styles.text}>🏠 {order.address}</Text>
-          {/* <Text style={styles.text}>🛍️ Items: {order.items.join(',')}</Text> */}
-          <Text style={styles.amount}>💰 ₹{order.finalamount}</Text>
-        </Card.Content>
+        <View style={styles.cardRow}>
+          <Card.Content style={styles.content}>
+            <Text style={styles.name}>👤 {order.name}</Text>
+            <Text style={styles.text}>📞 {order.number}</Text>
+            <Text style={styles.text}>🏠 {order.address}</Text>
+            <Text style={styles.amount}>💰 ₹{order.finalamount}</Text>
+          </Card.Content>
+          <IconButton
+            icon="file-download-outline"
+            iconColor="#2e7d32"
+            size={28}
+            onPress={() => printToFile(order.billHTML)}
+          />
+        </View>
       </Card>
     );
   };
 
   const fetchOrders = async () => {
-     try {
-          if(user){
-            const q = query(orderCollection, where("userId" , "==", user.uid))
-            const data = await getDocs(q)
-            const orders = data.docs.map((doc) => ({
-              id: doc.id,
-              ...doc.data(),
-            }));
-      
-            setOrdersList(orders);
-            console.log("Orders fetched:", user.uid);
-          }
-          else{
-            console.log("No user logged in!!!!")
-          }
-          console.log("Item added!!!!")
-        } catch (error) {
-          console.log("Error adding data!!!");
-        }
+    try {
+      const user = auth.currentUser;
+
+      if (user) {
+        const userId = user.uid;
+        const orderCollection = collection(database, "users", userId, "orders");
+        const data = await getDocs(orderCollection);
+
+        const orders = data.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setOrdersList(orders);
+        console.log("Orders fetched:", orders);
+      } else {
+        console.log("No user logged in!");
+      }
+    } catch (error) {
+      console.log("Error fetching orders:", error);
+    }
   };
 
-  useEffect(()=>{
-    fetchOrders()
-  },[])
+  useEffect(() => {
+    fetchOrders();
+  }, []);
   return (
     <FlatList
       data={ordersList}
@@ -89,26 +97,36 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
   },
   card: {
+    padding:10,
     marginBottom: 16,
     borderRadius: 16,
     backgroundColor: "#f9f9f9",
     elevation: 4,
   },
+  cardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: 4,
+  },
+  content: {
+    flex: 1,
+  },
   name: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-    marginBottom: 6,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1a1a1a",
+    marginBottom: 4,
   },
   text: {
     fontSize: 14,
-    marginBottom: 4,
-    color: "black",
+    color: "#444",
+    marginBottom: 2,
   },
   amount: {
-    marginTop: 8,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
-    color: "black",
+    color: "#2e7d32",
+    marginTop: 6,
   },
 });

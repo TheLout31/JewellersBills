@@ -20,6 +20,7 @@ const AddDetails = ({ route }) => {
   const [number, setNumber] = useState("(+91) ");
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [billHTML , setBillHTML] = useState("")
   const user = auth.currentUser
   const padNumber = (num, length = 5) => String(num).padStart(length, "0");
 
@@ -34,6 +35,7 @@ const AddDetails = ({ route }) => {
           address: address,
           items: items,
           finalamount: finalamount,
+          billHTML: billHTML
         });
       } else {
         console.log("No user logged in!!!!");
@@ -106,18 +108,18 @@ const AddDetails = ({ route }) => {
       const year = todaydate.getFullYear();
       const GST = function () {
         if (includeGST) {
-          return percentage(3, finalamount).toFixed(1);
+          return percentage(3, finalamount).toFixed(2);
         } else {
-          if (includeSGST) return percentage(1.5, finalamount).toFixed(1);
-          if (includeCGST) return percentage(1.5, finalamount).toFixed(1);
+          if (includeSGST) return percentage(1.5, finalamount).toFixed(2);
+          if (includeCGST) return percentage(1.5, finalamount).toFixed(2);
         }
       };
-      const GSTValue = (includeGST ? percentage(3, finalamount) : 0).toFixed(1);
+      const GSTValue = (includeGST ? percentage(3, finalamount) : 0).toFixed(2);
       const CGSTValue = (
         includeCGST || includeSGST ? percentage(1.5, finalamount) : 0
-      ).toFixed(1);
-      const IGSTValue = (CGSTValue * 2).toFixed(1);
-      const TheFinalAmount = finalamount.toFixed(1);
+      ).toFixed(2);
+      const IGSTValue = (CGSTValue * 2).toFixed(2);
+      const TheFinalAmount = finalamount.toFixed(2);
       // Inject form data dynamically
       const populatedHTML = htmlContent
         .replace("{{custName}}", name || "N/A")
@@ -148,11 +150,14 @@ const AddDetails = ({ route }) => {
     try {
       console.log("Next button clicked!!!!");
       const html = await generateInvoiceHTML();
+      setBillHTML(html || null)
       // On iOS/android prints the given html. On web prints the HTML from the current page.
       const { uri } = await Print.printToFileAsync({
         html: html,
         base64: false,
       });
+      console.log("type of html data",typeof(html))
+     
       console.log("File has been saved to:", uri);
       await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
     } catch (error) {
@@ -161,9 +166,8 @@ const AddDetails = ({ route }) => {
   };
 
   const handleGeneratePDF = async () => {
-    // Your PDF generation logic goes here
-    // console.log("Screen adddetails items data ====>>>", items);
-    // await printToFile();
+    console.log("Screen adddetails items data ====>>>", items);
+    await printToFile();
     console.log("user details in Add detials=====>", user);
     addOrders();
   };
