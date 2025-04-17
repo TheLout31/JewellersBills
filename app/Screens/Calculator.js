@@ -148,6 +148,71 @@ export default function Calculator() {
     setFinalAmount(totalFinal);
     setnextbtndisabled(false);
   };
+  //  const handleGetAmount = () => {
+  //   let hasErrors = false;
+  //   let totalBeforeGST = 0;
+  //   let updatedErrors = {};
+  //   let updatedItems = [];
+
+  //   const newItems = items.map((item, idx) => {
+  //     let newErrors = {};
+
+  //     if (!item.itemname?.trim()) {
+  //       newErrors.itemname = "Item name is required";
+  //     }
+
+  //     if (!item.weight || isNaN(item.weight) || item.weight <= 0) {
+  //       newErrors.weight = "Invalid weight";
+  //     }
+
+  //     if (!item.rate || isNaN(item.rate) || item.rate <= 0) {
+  //       newErrors.rate = "Invalid rate";
+  //     }
+
+  //     if (Object.keys(newErrors).length > 0) {
+  //       updatedErrors[idx] = newErrors;
+  //       hasErrors = true;
+  //       return { ...item }; // Return unmodified item
+  //     }
+  //     let baseTotal = item.weight * item.rate;
+  //     let totalMakingCharges = 0;
+
+  //     if (item.makingChargeType === "Percentage") {
+  //       totalMakingCharges = percentage(item.makingCharges, baseTotal);
+  //     } else if (item.makingChargeType === "Fixed") {
+  //       totalMakingCharges = item.makingCharges;
+  //     }
+
+  //     const totalamount = baseTotal + totalMakingCharges;
+  //     totalBeforeGST += totalamount;
+
+  //     return {
+  //       ...item,
+  //       totalamount,
+  //       totalMakingCharges,
+  //     };
+  //   });
+
+  //   if (hasErrors) {
+  //     setErrors(updatedErrors);
+  //     setVisible(true); // show error modal or tooltip
+  //     return; // Stop execution if there are errors
+  //   }
+
+  //   setErrors({}); // clear errors
+  //   setItems(newItems);
+  //   setBeforeMakingCharge(totalBeforeGST);
+  //   setBeforeGSTCharge(totalBeforeGST);
+
+  //   let finalTotal = totalBeforeGST;
+
+  //   if (includeGST || includeSGST) {
+  //     finalTotal += percentage(3, totalBeforeGST);
+  //   }
+
+  //   setFinalAmount(finalTotal);
+  //   setnextbtndisabled(false);
+  // };
 
   return (
     <ScrollView style={styles.container}>

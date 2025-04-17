@@ -9,7 +9,7 @@ import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { database } from "@/Firebase/FirebaseConfig";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection,getDocs } from "firebase/firestore";
 import { auth } from "@/Firebase/FirebaseConfig";
 
 const AddDetails = ({ route }) => {
@@ -23,8 +23,9 @@ const AddDetails = ({ route }) => {
   const [billHTML , setBillHTML] = useState("")
   const user = auth.currentUser
   const padNumber = (num, length = 5) => String(num).padStart(length, "0");
+  
 
-  const addOrders = async () => {
+  const addOrders = async (html) => {
     try {
       if (user) {
         const userId = user.uid;
@@ -35,7 +36,7 @@ const AddDetails = ({ route }) => {
           address: address,
           items: items,
           finalamount: finalamount,
-          billHTML: billHTML
+          billHTML: html
         });
       } else {
         console.log("No user logged in!!!!");
@@ -47,24 +48,27 @@ const AddDetails = ({ route }) => {
   };
 
   const generateBillNumber = async () => {
-    const year = new Date().getFullYear(); // e.g. 2025
-    const key = `billCount-${year}`;
-
+    const userId = user.uid;
+    const year = new Date().getFullYear();
+    const billsCollectionRef = collection(database, "users", userId, "bills");
+  
     try {
-      const storedCount = await AsyncStorage.getItem(key);
-      const count = storedCount ? parseInt(storedCount) + 1 : 1;
-
+      // Get all previous bills to calculate count
+      const snapshot = await getDocs(billsCollectionRef);
+      const count = snapshot.size + 1; // snapshot.size gives the number of documents
+  
       const billNumber = `${year}${padNumber(count)}`;
-
-      // Save the updated count
-      await AsyncStorage.setItem(key, count.toString());
-
+  
+      // Save the bill number in the bills subcollection
+      await addDoc(billsCollectionRef, { billNumber });
+  
       return billNumber;
     } catch (error) {
       console.error("Error generating bill number:", error);
       return null;
     }
   };
+  
 
   function percentage(additional, totalValue) {
     let t = (additional / 100) * totalValue;
@@ -150,14 +154,13 @@ const AddDetails = ({ route }) => {
     try {
       console.log("Next button clicked!!!!");
       const html = await generateInvoiceHTML();
-      setBillHTML(html || null)
-      // On iOS/android prints the given html. On web prints the HTML from the current page.
+      
+      
       const { uri } = await Print.printToFileAsync({
         html: html,
         base64: false,
       });
-      console.log("type of html data",typeof(html))
-     
+      
       console.log("File has been saved to:", uri);
       await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
     } catch (error) {
@@ -166,10 +169,12 @@ const AddDetails = ({ route }) => {
   };
 
   const handleGeneratePDF = async () => {
+    const html = await generateInvoiceHTML();
+
     console.log("Screen adddetails items data ====>>>", items);
     await printToFile();
     console.log("user details in Add detials=====>", user);
-    addOrders();
+    await addOrders(html);
   };
 
   return (

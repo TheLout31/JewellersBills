@@ -32,6 +32,7 @@ const MyOrders = () => {
   };
 
   const OrderCard = ({ order }) => {
+   
     return (
       <Card style={styles.card}>
         <View style={styles.cardRow}>
@@ -39,7 +40,7 @@ const MyOrders = () => {
             <Text style={styles.name}>👤 {order.name}</Text>
             <Text style={styles.text}>📞 {order.number}</Text>
             <Text style={styles.text}>🏠 {order.address}</Text>
-            <Text style={styles.amount}>💰 ₹{order.finalamount}</Text>
+            <Text style={styles.amount}>💰 ₹{order.finalamount.toFixed(2)}</Text>
           </Card.Content>
           <IconButton
             icon="file-download-outline"
