@@ -106,8 +106,9 @@ const AddDetails = ({ route }) => {
 
       const billNumber = await generateBillNumber();
       const date = todaydate.getDate();
-      const month = todaydate.getMonth();
+      const month = todaydate.getMonth()+1;
       const year = todaydate.getFullYear();
+      const followedYear = year.toString().slice(-2); // "26"
       const total_amount = TheItemTotal_Amount().toFixed(2);
 
 
@@ -121,6 +122,7 @@ const AddDetails = ({ route }) => {
         .replace("{{date}}", date || "N/A")
         .replace("{{month}}", month || "N/A")
         .replace("{{year}}", year || "N/A")
+        .replace("{{followedyear}}", Number(followedYear)+1|| "N/A")
         .replace("{{Paydate}}", date || "N/A")
         .replace("{{Paymonth}}", month || "N/A")
         .replace("{{Payyear}}", year || "N/A")
