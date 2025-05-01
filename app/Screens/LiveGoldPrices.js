@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   card: {
+    backgroundColor:"white",
     marginBottom: 20,
     borderRadius: 12,
     elevation: 4,
