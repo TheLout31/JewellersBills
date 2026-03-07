@@ -9,7 +9,7 @@ import * as Print from "expo-print";
 import { shareAsync } from "expo-sharing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { database } from "@/Firebase/FirebaseConfig";
-import { addDoc, collection,getDocs } from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import { auth } from "@/Firebase/FirebaseConfig";
 
 const AddDetails = ({ route }) => {
@@ -20,10 +20,9 @@ const AddDetails = ({ route }) => {
   const [number, setNumber] = useState("(+91) ");
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
-  const [billHTML , setBillHTML] = useState("")
-  const user = auth.currentUser
+  const [billHTML, setBillHTML] = useState("");
+  const user = auth.currentUser;
   const padNumber = (num, length = 5) => String(num).padStart(length, "0");
-  
 
   const addOrders = async (html) => {
     try {
@@ -36,7 +35,7 @@ const AddDetails = ({ route }) => {
           address: address,
           items: items,
           finalamount: finalamount,
-          billHTML: html
+          billHTML: html,
         });
       } else {
         console.log("No user logged in!!!!");
@@ -51,24 +50,23 @@ const AddDetails = ({ route }) => {
     const userId = user.uid;
     const year = new Date().getFullYear();
     const billsCollectionRef = collection(database, "users", userId, "bills");
-  
+
     try {
       // Get all previous bills to calculate count
       const snapshot = await getDocs(billsCollectionRef);
       const count = snapshot.size + 1; // snapshot.size gives the number of documents
-  
+
       const billNumber = `${year}${padNumber(count)}`;
-  
+
       // Save the bill number in the bills subcollection
       await addDoc(billsCollectionRef, { billNumber });
-  
+
       return billNumber;
     } catch (error) {
       console.error("Error generating bill number:", error);
       return null;
     }
   };
-  
 
   function percentage(additional, totalValue) {
     let t = (additional / 100) * totalValue;
@@ -86,11 +84,11 @@ const AddDetails = ({ route }) => {
       const todaydate = new Date();
       // Load the HTML file from assets
       const htmlAsset = Asset.fromModule(
-        require("@/assets/templates/invoice.html")
+        require("@/assets/templates/invoice.html"),
       );
       await htmlAsset.downloadAsync();
       const htmlContent = await FileSystem.readAsStringAsync(
-        htmlAsset.localUri
+        htmlAsset.localUri,
       );
       const itemRows = items
         .map(
@@ -103,7 +101,7 @@ const AddDetails = ({ route }) => {
         <td>Rs ${item.rate}</td>
         <td>${item.makingCharges}%</td>
         <td>Rs ${item.totalamount}</td>
-      </tr>`
+      </tr>`,
         )
         .join("");
       const billNumber = await generateBillNumber();
@@ -154,14 +152,13 @@ const AddDetails = ({ route }) => {
     try {
       console.log("Next button clicked!!!!");
       const html = await generateInvoiceHTML();
-      
-      
+
       const { uri } = await Print.printToFileAsync({
         html: html,
         base64: false,
       });
-      
-      console.log("File has been saved to:", uri);
+
+      // console.log("File has been saved to:", uri);
       await shareAsync(uri, { UTI: ".pdf", mimeType: "application/pdf" });
     } catch (error) {
       ToastAndroid.show("Unable to Print PDF!!", ToastAndroid.SHORT);
@@ -171,9 +168,9 @@ const AddDetails = ({ route }) => {
   const handleGeneratePDF = async () => {
     const html = await generateInvoiceHTML();
 
-    console.log("Screen adddetails items data ====>>>", items);
+    // console.log("Screen adddetails items data ====>>>", items);
     await printToFile();
-    console.log("user details in Add detials=====>", user);
+    // console.log("user details in Add detials=====>", user);
     await addOrders(html);
   };
 

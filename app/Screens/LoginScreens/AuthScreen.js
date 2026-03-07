@@ -13,7 +13,11 @@ import {
   Title,
   DefaultTheme,
 } from "react-native-paper";
-import { getAuth, createUserWithEmailAndPassword ,signInWithEmailAndPassword} from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 // import { auth } from "../../../Firebase/FirebaseConfig";
 
@@ -32,15 +36,15 @@ const AuthScreen = () => {
   const navigation = useNavigation();
   const auth = getAuth();
 
-  const handleAuth = async() => {
+  const handleAuth = async () => {
     if (isSignUp) {
       // Sign up logic
-     await createUserWithEmailAndPassword(auth, email, password)
+      await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed up
           const user = userCredential.user;
           setIsSignUp(true);
-          
+
           // ...
         })
         .catch((error) => {
@@ -57,18 +61,37 @@ const AuthScreen = () => {
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-          navigation.navigate("Home")
+          navigation.navigate("Home");
           // ...
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
           console.log(errorCode, errorMessage);
-        ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
+          ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
         });
-        
     }
   };
+
+  // const handleAuth = async () => {
+  //   if (!email || !password) {
+  //     ToastAndroid.show("Please enter email and password", ToastAndroid.SHORT);
+  //     return;
+  //   }
+
+  //   try {
+  //     if (isSignUp) {
+  //       await createUserWithEmailAndPassword(auth, email, password);
+  //       ToastAndroid.show("Account created successfully", ToastAndroid.SHORT);
+  //       setIsSignUp(false);
+  //     } else {
+  //       await signInWithEmailAndPassword(auth, email, password);
+  //     }
+  //   } catch (error) {
+  //     console.log(error.code, error.message);
+  //     ToastAndroid.show(error.message, ToastAndroid.SHORT);
+  //   }
+  // };
 
   return (
     <PaperProvider theme={theme}>

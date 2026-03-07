@@ -7,7 +7,7 @@ import Calculator from "../Screens/Calculator";
 import AddDetails from "../Screens/AddDetails";
 import AuthScreen from "../Screens/LoginScreens/AuthScreen";
 import MyOrders from "../Screens/MyOrders";
-import LiveGoldPrices from "../Screens/LiveGoldPrices"
+import LiveGoldPrices from "../Screens/LiveGoldPrices";
 import { auth } from "../../Firebase/FirebaseConfig";
 import { onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth";
 import {
@@ -21,12 +21,12 @@ import {
 
 const Stack = createStackNavigator();
 
-const StackNavigator = ({ navigation }) => {
+const StackNavigator = () => {
   // const user = auth.currentUser;
 
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
-  const [visible, setVisible] = React.useState(false);
+  const [visible, setVisible] = useState(false);
   const [signOutcheck, setsignOutcheck] = useState(false);
 
   const showDialog = () => setVisible(true);
@@ -44,23 +44,32 @@ const StackNavigator = ({ navigation }) => {
     }
   };
 
-  const checkPersistance = () => {
+  // const checkPersistance = () => {
+  //   const unsubscribe = onAuthStateChanged(auth, (user) => {
+  //     console.log("User Details =====> ", user);
+  //     setUser(user);
+  //     if (initializing) setInitializing(false);
+  //   });
+
+  //   return unsubscribe;
+  // };
+
+  // useEffect(() => {
+  //   checkPersistance();
+  // }, [signOutcheck]);
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log("User Details =====> ", user);
       setUser(user);
-      if (initializing) setInitializing(false);
+      setInitializing(false);
     });
 
-    return unsubscribe;
-  };
-
-  useEffect(() => {
-    checkPersistance();
-  }, [signOutcheck]);
+    return () => unsubscribe();
+  }, []);
 
   // if (initializing) return <SplashScreen />;
   return (
-    <PaperProvider>
+    <>
       <Stack.Navigator screenOptions={{ headerShown: true }}>
         {user ? (
           <>
@@ -191,7 +200,7 @@ const StackNavigator = ({ navigation }) => {
           </Dialog.Actions>
         </Dialog>
       </Portal>
-    </PaperProvider>
+    </>
   );
 };
 
