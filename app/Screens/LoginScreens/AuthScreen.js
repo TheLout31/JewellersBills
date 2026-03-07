@@ -33,12 +33,14 @@ const AuthScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const auth = getAuth();
 
   const handleAuth = async () => {
     if (isSignUp) {
       // Sign up logic
+      setLoading(true);
       await createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed up
@@ -46,6 +48,7 @@ const AuthScreen = () => {
           setIsSignUp(true);
 
           // ...
+          setLoading(false);
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -53,22 +56,26 @@ const AuthScreen = () => {
           console.log(errorCode, errorMessage);
           ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
           // ..
+          setLoading(false);
         });
       console.log("Signing up with:", email, password);
     } else {
       // Sign in logic
+      setLoading(true);
       await signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
           navigation.navigate("Home");
           // ...
+          setLoading(false);
         })
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
           console.log(errorCode, errorMessage);
           ToastAndroid.show(errorMessage, ToastAndroid.SHORT);
+          setLoading(false);
         });
     }
   };
@@ -115,7 +122,12 @@ const AuthScreen = () => {
           style={styles.input}
         />
 
-        <Button mode="contained" onPress={handleAuth} style={styles.button}>
+        <Button
+          mode="contained"
+          onPress={handleAuth}
+          style={styles.button}
+          loading={loading}
+        >
           {isSignUp ? "Sign Up" : "Sign In"}
         </Button>
 

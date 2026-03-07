@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
-import { Card, IconButton } from "react-native-paper";
+import { ActivityIndicator, Card, IconButton } from "react-native-paper";
 import { database } from "@/Firebase/FirebaseConfig";
 import { getDocs, collection, query, where } from "firebase/firestore";
 import { auth } from "@/Firebase/FirebaseConfig";
@@ -11,6 +11,7 @@ const MyOrders = () => {
   const user = auth.currentUser;
   const orderCollection = collection(database, "Orders");
   const [ordersList, setOrdersList] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const printToFile = async (html) => {
     try {
@@ -53,6 +54,7 @@ const MyOrders = () => {
 
   const fetchOrders = useCallback(async () => {
     try {
+      setLoading(true);
       const user = auth.currentUser;
 
       if (user) {
@@ -64,12 +66,14 @@ const MyOrders = () => {
           id: doc.id,
           ...doc.data(),
         }));
-
+        setLoading(false);
         setOrdersList(orders);
       } else {
+        setLoading(false);
         console.log("No user logged in!");
       }
     } catch (error) {
+      setLoading(false);
       console.log("Error fetching orders:", error);
     }
   }, []);
@@ -79,10 +83,17 @@ const MyOrders = () => {
   }, []);
   return (
     <FlatList
+      loading={loading}
       data={ordersList}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.container}
       renderItem={({ item }) => <OrderCard order={item} />}
+      ListEmptyComponent={() => {
+        if (loading) {
+          return <ActivityIndicator size="large" color="#8a2be2" />;
+        }
+        return <Text>No orders found</Text>; // Optional: show a message if list is empty after loading
+      }}
     />
   );
 };

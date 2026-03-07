@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import { NavigationContainer } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import Home from "../Screens/Home";
 import Calculator from "../Screens/Calculator";
 import AddDetails from "../Screens/AddDetails";
@@ -28,7 +28,7 @@ const StackNavigator = () => {
   const [initializing, setInitializing] = useState(true);
   const [visible, setVisible] = useState(false);
   const [signOutcheck, setsignOutcheck] = useState(false);
-
+  const navigation = useNavigation();
   const showDialog = () => setVisible(true);
   const hideDialog = () => setVisible(false);
 
@@ -36,8 +36,8 @@ const StackNavigator = () => {
     try {
       await firebaseSignOut(auth);
       hideDialog();
-      // setsignOutcheck(true)
-      // navigation.navigate("auth")
+      setsignOutcheck(true);
+      navigation.navigate("auth");
       // close dialog after signout
     } catch (error) {
       console.log("Sign out error:", error);
