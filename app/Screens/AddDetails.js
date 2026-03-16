@@ -403,25 +403,23 @@ const AddDetails = ({ route }) => {
         m = today.getMonth() + 1,
         y = today.getFullYear();
 
-      return (
-        htmlContent
-          .replace("{{custName}}", name || "N/A")
-          .replace("{{PhoneNumber}}", number || "N/A")
-          .replace("{{Address}}", address || "N/A")
-          .replace("{{PaymentMethod}}", paymentMethod)
-          // .replace("{{billnumber}}", billNumber || "N/A")
-          .replace("{{date}}", d)
-          .replace("{{month}}", m)
-          .replace("{{year}}", y)
-          .replace("{{followedyear}}", Number(y.toString().slice(-2)) + 1)
-          .replace("{{Paydate}}", d)
-          .replace("{{Paymonth}}", m)
-          .replace("{{Payyear}}", y)
-          .replace("{{items}}", itemRows)
-          .replace("{{total_amount}}", TheItemTotal().toFixed(2))
-          .replace("{{IGST}}", SGSTRows)
-          .replace("{{finalamount}}", finalamount.toFixed(2))
-      );
+      return htmlContent
+        .replace("{{custName}}", name || "N/A")
+        .replace("{{PhoneNumber}}", number || "N/A")
+        .replace("{{Address}}", address || "N/A")
+        .replace("{{PaymentMethod}}", paymentMethod)
+
+        .replace("{{date}}", d)
+        .replace("{{month}}", m)
+        .replace("{{year}}", y)
+        .replace("{{followedyear}}", Number(y.toString().slice(-2)) + 1)
+        .replace("{{Paydate}}", d)
+        .replace("{{Paymonth}}", m)
+        .replace("{{Payyear}}", y)
+        .replace("{{items}}", itemRows)
+        .replace("{{total_amount}}", TheItemTotal().toFixed(2))
+        .replace("{{IGST}}", SGSTRows)
+        .replace("{{finalamount}}", finalamount.toFixed(2));
     } catch {
       return "<h1>Error loading invoice</h1>";
     }

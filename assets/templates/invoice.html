@@ -1,136 +1,142 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tax Invoice</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: Arial, sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tax Invoice</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: Arial, sans-serif;
+      }
 
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 20px;
-      box-sizing: border-box;
-    }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+        box-sizing: border-box;
+      }
 
-    .invoice-container {
-      width: 100%;
-      max-width: 800px;
-     
-      border: 2px solid #000;
-      padding: 2vh;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      font-size: 1.7vh; /* Dynamic font size based on viewport height */
-    }
+      .invoice-container {
+        width: 100%;
+        max-width: 800px;
 
-    .header {
-      text-align: center;
-      font-weight: bold;
-      line-height: 1.4;
-    }
+        border: 2px solid #000;
+        padding: 2vh;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-size: 1.7vh; /* Dynamic font size based on viewport height */
+      }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1vh;
-      font-size: 1.6vh;
-    }
+      .header {
+        text-align: center;
+        font-weight: bold;
+        line-height: 1.4;
+      }
 
-    th, td {
-      border: 1px solid black;
-      padding: 0.5vh;
-      text-align: left;
-    }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1vh;
+        font-size: 1.6vh;
+      }
 
-    .section {
-      margin-top: 2vh;
-    }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 0.5vh;
+        text-align: left;
+      }
 
-    .footer {
-       margin-top: 2vh;
-      font-size: 1.5vh;
-      line-height: 1.4;
-      text-align: left;
-    }
+      .section {
+        margin-top: 2vh;
+      }
 
-    p {
-      margin: 0.5vh 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="invoice-container">
-    <div>
-      <div class="header">
-        <h2 style="margin: 0.5vh 0;">UTTRAKHAND BORA JEWELLERS</h2>
-        <p>676-G, Nyaykhand-1, Indirapuram Ghaziabad</p>
-        <p>GSTIN: 09AIEPB1431G1ZU | Mob: 9718186568, 8800186763</p>
-      </div>
+      .footer {
+        margin-top: 2vh;
+        font-size: 1.5vh;
+        line-height: 1.4;
+        text-align: left;
+      }
 
-      <div class="section">
-        <p><strong>M/s:</strong> {{custName}}</p>
-        <p><strong>Phone Number:</strong> {{PhoneNumber}}</p>
-        <p><strong>Address:</strong> {{Address}}</p>
-        <p><strong>Bill No:</strong> {{billnumber}} &nbsp;&nbsp;&nbsp;&nbsp;
-           <strong>Date:</strong> {{date}}/{{month}}/{{year}}-{{followedyear}}</p>
-      </div>
+      p {
+        margin: 0.5vh 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="invoice-container">
+      <div>
+        <div class="header">
+          <h2 style="margin: 0.5vh 0">UTTRAKHAND BORA JEWELLERS</h2>
+          <p>676-G, Nyaykhand-1, Indirapuram Ghaziabad</p>
+          <p>GSTIN: 09AIEPB1431G1ZU | Mob: 9718186568, 8800186763</p>
+        </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Item</th>
-            <th>HSN</th>
-            <th>Purity</th>
-            <th>Weight</th>
-            <th>Rate/g</th>
-            <th>Making Charges</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{items}}
-        </tbody>
-      </table>
-      
-
-      <div class="section">
-        <p><strong>Payment By:</strong> Cash _______ Cheque No ______ Date {{Paydate}}/{{Paymonth}}/{{Payyear}}</p>
+        <div class="section">
+          <p><strong>M/s:</strong> {{custName}}</p>
+          <p><strong>Phone Number:</strong> {{PhoneNumber}}</p>
+          <p><strong>Address:</strong> {{Address}}</p>
+          <p>
+            <strong>Bill No:</strong> _______ &nbsp;&nbsp;&nbsp;&nbsp;
+            <strong>Date:</strong> {{date}}/{{month}}/{{year}}-{{followedyear}}
+          </p>
+        </div>
 
         <table>
-          <tr>
-            <th>Total</th>
-            <td>Rs {{total_amount}}</td>
-          </tr>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>HSN</th>
+              <th>Purity</th>
+              <th>Weight</th>
+              <th>Rate/g</th>
+              <th>Making Charges</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
           <tbody>
-            {{IGST}}
+            {{items}}
           </tbody>
-          <tr>
-            <th>G.TOTAL</th>
-            <td>Rs {{finalamount}}</td>
-          </tr>
         </table>
+
+        <div class="section">
+          <p>
+            <strong>Payment By:</strong> Cash _______ Cheque No ______ Date
+            {{Paydate}}/{{Paymonth}}/{{Payyear}}
+          </p>
+
+          <table>
+            <tr>
+              <th>Total</th>
+              <td>Rs {{total_amount}}</td>
+            </tr>
+            <tbody>
+              {{IGST}}
+            </tbody>
+            <tr>
+              <th>G.TOTAL</th>
+              <td>Rs {{finalamount}}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Goods Once Sold will not be taken back.</p>
+        <p>100% Exchange Guarantee</p>
+        <p>10% will be deducted from net gold weight in case of refund.</p>
+        <p>Interest @ 18% p.a. charged if not paid on time.</p>
+        <p><strong>For UTTRAKHAND BORA JEWELLERS</strong></p>
+        <p>Signature: ____________________</p>
       </div>
     </div>
-
-    <div class="footer">
-      <p>Goods Once Sold will not be taken back.</p>
-      <p>100% Exchange Guarantee</p>
-      <p>10% will be deducted from net gold weight in case of refund.</p>
-      <p>Interest @ 18% p.a. charged if not paid on time.</p>
-      <p><strong>For UTTRAKHAND BORA JEWELLERS</strong></p>
-      <p>Signature: ____________________</p>
-    </div>
-  </div>
-</body>
+  </body>
 </html>
