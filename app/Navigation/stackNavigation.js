@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-
+import { Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Home from "../Screens/Home";
 import Calculator from "../Screens/Calculator";
@@ -20,6 +20,22 @@ import {
 } from "react-native-paper";
 
 const Stack = createStackNavigator();
+
+const HEADER_OPTIONS = {
+  headerStyle: {
+    backgroundColor: "#8a2be2",
+    elevation: 0, // Android — removes shadow line
+    shadowOpacity: 0, // iOS
+  },
+  headerTintColor: "#fff",
+  headerTitleStyle: {
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontWeight: "600",
+    fontSize: 18,
+    letterSpacing: 0.3,
+  },
+  headerBackTitleVisible: false,
+};
 
 const StackNavigator = () => {
   // const user = auth.currentUser;
@@ -70,7 +86,7 @@ const StackNavigator = () => {
   // if (initializing) return <SplashScreen />;
   return (
     <>
-      <Stack.Navigator screenOptions={{ headerShown: true }}>
+      <Stack.Navigator screenOptions={HEADER_OPTIONS}>
         {user ? (
           <>
             <Stack.Screen
@@ -144,6 +160,7 @@ const StackNavigator = () => {
               component={LiveGoldPrices}
               options={{
                 title: "LiveRate", // Optional: Set the header title
+                headerShown: true,
                 headerStyle: {
                   backgroundColor: "#8a2be2", // Set the header background color
                 },
@@ -160,7 +177,7 @@ const StackNavigator = () => {
               name="Auth"
               component={AuthScreen}
               options={{
-                title: "Auth", // Optional: Set the header title
+                headerShown: false,
                 headerStyle: {
                   backgroundColor: "#8a2be2", // Set the header background color
                 },

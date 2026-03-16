@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ToastAndroid } from "react-native";
-import { TextInput, Button, Card, Title } from "react-native-paper";
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  StatusBar,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
@@ -11,6 +18,58 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { database } from "@/Firebase/FirebaseConfig";
 import { addDoc, collection, getDocs } from "firebase/firestore";
 import { auth } from "@/Firebase/FirebaseConfig";
+
+const theme = {
+  primary: "#8a2be2",
+  primaryDark: "#6A1FBB",
+  primaryDeep: "#3D1B6E",
+  primaryLight: "#F3EEFF",
+  primaryBorder: "rgba(138,43,226,0.2)",
+  gold: "#C9A840",
+  goldLight: "#F0D060",
+  surface: "#FDFBFF",
+  bg: "#F7F4FF",
+  muted: "#9B84C4",
+  white: "#FFFFFF",
+};
+
+const PAYMENT_METHODS = [
+  { label: "Cash", emoji: "💵" },
+  { label: "UPI", emoji: "📲" },
+  { label: "Card", emoji: "💳" },
+  { label: "NEFT", emoji: "🏦" },
+];
+
+function LabelInput({ label, icon, multiline, ...props }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <View style={styles.inputGroup}>
+      <Text style={styles.inputLabel}>{label}</Text>
+      <View
+        style={[
+          styles.inputWrap,
+          focused && styles.inputWrapFocused,
+          multiline && {
+            minHeight: 72,
+            alignItems: "flex-start",
+            paddingTop: 10,
+          },
+        ]}
+      >
+        {icon && <Text style={styles.inputIcon}>{icon}</Text>}
+        <TextInput
+          style={[styles.input, multiline && { height: 52 }]}
+          placeholderTextColor={theme.muted}
+          multiline={multiline}
+          textAlignVertical={multiline ? "top" : "center"}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          {...props}
+        />
+      </View>
+    </View>
+  );
+}
 
 const AddDetails = ({ route }) => {
   const navigation = useNavigation();
@@ -174,103 +233,239 @@ const AddDetails = ({ route }) => {
     await addOrders(html);
   };
 
+  const itemCount = items.length;
+  const gstLabel = includeGST
+    ? "IGST 3%"
+    : includeSGST
+      ? "SGST 1.5%"
+      : "No GST";
+
   return (
-    <View style={styles.container}>
-      <Card style={styles.card}>
-        <Card.Content>
-          <Title style={styles.title}>Add Details</Title>
-          <TextInput
-            label="Name"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            style={styles.input}
-            theme={{
-              colors: {
-                text: "#black", // user-typed text color
-                primary: "#8a2be2", // active border & label color
-                placeholder: "#888", // label color when inactive
-              },
-            }}
-          />
-          <TextInput
-            label="Phone No."
-            value={number}
-            onChangeText={setNumber}
-            keyboardType="numeric"
-            mode="outlined"
-            style={styles.input}
-            theme={{
-              colors: {
-                text: "#black", // user-typed text color
-                primary: "#8a2be2", // active border & label color
-                placeholder: "#888", // label color when inactive
-              },
-            }}
-          />
-          <TextInput
-            label="Address"
-            value={address}
-            onChangeText={setAddress}
-            mode="outlined"
-            style={styles.input}
-            theme={{
-              colors: {
-                text: "#black", // user-typed text color
-                primary: "#8a2be2", // active border & label color
-                placeholder: "#888", // label color when inactive
-              },
-            }}
-          />
-          <TextInput
-            label="Payment Method"
-            value={paymentMethod}
-            onChangeText={setPaymentMethod}
-            mode="outlined"
-            style={styles.input}
-            theme={{
-              colors: {
-                text: "#black", // user-typed text color
-                primary: "#8a2be2", // active border & label color
-                placeholder: "#888", // label color when inactive
-              },
-            }}
-          />
-          <Button
-            mode="contained"
-            onPress={handleGeneratePDF}
-            style={styles.button}
-            buttonColor="#8a2be2"
-          >
-            Generate PDF
-          </Button>
-        </Card.Content>
-      </Card>
-    </View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <StatusBar backgroundColor={theme.primary} barStyle="light-content" />
+
+      {/* ── Bill summary strip ── */}
+      <View style={styles.summaryStrip}>
+        <View>
+          <Text style={styles.stripLabel}>BILL TOTAL</Text>
+          <Text style={styles.stripValue}>₹{finalamount.toFixed(2)}</Text>
+          <Text style={styles.stripSub}>
+            {itemCount} item{itemCount !== 1 ? "s" : ""} · {gstLabel}
+          </Text>
+        </View>
+        <View style={styles.stripBadge}>
+          <Text style={styles.stripBadgeText}>✦ Draft</Text>
+        </View>
+      </View>
+
+      {/* ── Customer info ── */}
+      <Text style={styles.sectionTitle}>CUSTOMER INFORMATION</Text>
+
+      <LabelInput
+        label="Full Name"
+        icon="👤"
+        placeholder="Customer name"
+        value={name}
+        onChangeText={setName}
+      />
+      <LabelInput
+        label="Phone Number"
+        icon="📞"
+        placeholder="(+91) XXXXX XXXXX"
+        value={number}
+        onChangeText={setNumber}
+        keyboardType="phone-pad"
+      />
+      <LabelInput
+        label="Address"
+        icon="📍"
+        placeholder="Street, City, State..."
+        value={address}
+        onChangeText={setAddress}
+        multiline
+      />
+
+      {/* ── Payment method ── */}
+      <View style={styles.divider} />
+      <Text style={styles.sectionTitle}>PAYMENT METHOD</Text>
+
+      <View style={styles.payGrid}>
+        {PAYMENT_METHODS.map((method) => {
+          const selected = paymentMethod === method.label;
+          return (
+            <TouchableOpacity
+              key={method.label}
+              style={[styles.payOption, selected && styles.payOptionSelected]}
+              onPress={() => setPaymentMethod(method.label)}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.payDot, selected && styles.payDotSelected]}>
+                {selected && <View style={styles.payDotInner} />}
+              </View>
+              <Text
+                style={[styles.payLabel, selected && styles.payLabelSelected]}
+              >
+                {method.emoji} {method.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* ── Actions ── */}
+      <TouchableOpacity
+        style={styles.pdfBtn}
+        onPress={handleGeneratePDF}
+        activeOpacity={0.85}
+      >
+        <Text style={styles.pdfBtnText}>⬇ Generate PDF & Print</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.saveBtn} activeOpacity={0.85}>
+        <Text style={styles.saveBtnText}>✓ Save Bill</Text>
+      </TouchableOpacity>
+
+      <View style={{ height: 40 }} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1, backgroundColor: theme.bg, padding: 14 },
+
+  // Summary strip
+  summaryStrip: {
+    backgroundColor: theme.primaryDark,
+    borderRadius: 18,
     padding: 16,
-    justifyContent: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+    marginTop: 4,
+    overflow: "hidden",
   },
-  card: {
-    padding: 10,
+  stripLabel: {
+    fontSize: 9,
+    color: "rgba(255,255,255,0.55)",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginBottom: 4,
   },
-  title: {
-    marginBottom: 10,
-    fontSize: 20,
-    fontWeight: "bold",
+  stripValue: {
+    fontFamily: "serif",
+    fontSize: 26,
+    color: theme.goldLight,
+    fontWeight: "700",
   },
-  input: {
+  stripSub: { fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 3 },
+  stripBadge: {
+    backgroundColor: "rgba(240,208,96,0.15)",
+    borderWidth: 1,
+    borderColor: "rgba(240,208,96,0.3)",
+    borderRadius: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  stripBadgeText: { fontSize: 11, color: theme.goldLight, fontWeight: "500" },
+
+  sectionTitle: {
+    fontSize: 10,
+    color: theme.muted,
+    letterSpacing: 1.5,
     marginBottom: 12,
   },
-  button: {
-    marginTop: 10,
-    color: "#8a2be2",
+  divider: {
+    height: 0.5,
+    backgroundColor: "rgba(138,43,226,0.12)",
+    marginVertical: 16,
   },
+
+  // Input
+  inputGroup: { marginBottom: 12 },
+  inputLabel: {
+    fontSize: 9,
+    color: theme.muted,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    marginBottom: 5,
+  },
+  inputWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.primaryLight,
+    borderWidth: 1,
+    borderColor: theme.primaryBorder,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    gap: 8,
+  },
+  inputWrapFocused: { borderColor: theme.primary, backgroundColor: "#EDE0FF" },
+  inputIcon: { fontSize: 15 },
+  input: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "500",
+    color: theme.primaryDeep,
+    paddingVertical: 9,
+  },
+
+  // Payment
+  payGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 20 },
+  payOption: {
+    width: "48%",
+    backgroundColor: theme.primaryLight,
+    borderWidth: 1,
+    borderColor: "rgba(138,43,226,0.15)",
+    borderRadius: 12,
+    padding: 11,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  payOptionSelected: {
+    backgroundColor: "rgba(138,43,226,0.1)",
+    borderColor: theme.primary,
+  },
+  payDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: "rgba(138,43,226,0.3)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  payDotSelected: {
+    backgroundColor: theme.primary,
+    borderColor: theme.primary,
+  },
+  payDotInner: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: theme.white,
+  },
+  payLabel: { fontSize: 12, color: theme.primaryDeep, fontWeight: "500" },
+  payLabelSelected: { color: theme.primary },
+
+  // Buttons
+  pdfBtn: {
+    backgroundColor: theme.gold,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  pdfBtnText: { fontSize: 14, fontWeight: "700", color: "#3D2000" },
+  saveBtn: {
+    backgroundColor: theme.primary,
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+  },
+  saveBtnText: { fontSize: 14, fontWeight: "500", color: theme.white },
 });
 
 export default AddDetails;
