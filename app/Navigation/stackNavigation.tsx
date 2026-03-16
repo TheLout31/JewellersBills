@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import Home from "../Screens/Home";
 import Calculator from "../Screens/Calculator";
 import AddDetails from "../Screens/AddDetails";
-import LiveGoldPrices from "../Screens/LiveGoldPrices"
+import LiveGoldPrices from "../Screens/LiveGoldPrices";
 
 const Stack = createStackNavigator();
 
@@ -17,6 +17,7 @@ const StackNavigator = () => {
         component={Home}
         options={{
           title: "Home", // Optional: Set the header title
+          headerShown: false,
           headerStyle: {
             backgroundColor: "#8a2be2", // Set the header background color
           },
@@ -31,6 +32,7 @@ const StackNavigator = () => {
         component={Calculator}
         options={{
           title: "Calculator", // Optional: Set the header title
+
           headerStyle: {
             backgroundColor: "#8a2be2", // Set the header background color
           },
@@ -40,7 +42,6 @@ const StackNavigator = () => {
           },
         }}
       />
-
 
       <Stack.Screen
         name="Details"
@@ -61,6 +62,7 @@ const StackNavigator = () => {
         component={LiveGoldPrices}
         options={{
           title: "Live Gold Rate", // Optional: Set the header title
+          headerShown: false,
           headerStyle: {
             backgroundColor: "#8a2be2", // Set the header background color
           },
